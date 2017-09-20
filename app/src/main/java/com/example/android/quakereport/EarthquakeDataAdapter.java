@@ -21,6 +21,7 @@ import java.util.Date;
  */
 
 public class EarthquakeDataAdapter extends ArrayAdapter {
+    public static final String LOG_TAG = EarthquakeActivity.class.getName();
 
     public EarthquakeDataAdapter(@NonNull Context context, @NonNull ArrayList<EarthquakeData> objects) {
         super(context, 0, objects);
@@ -138,4 +139,6 @@ public class EarthquakeDataAdapter extends ArrayAdapter {
         }
         return ContextCompat.getColor(getContext(),colorResId);
     }
+
+
 }

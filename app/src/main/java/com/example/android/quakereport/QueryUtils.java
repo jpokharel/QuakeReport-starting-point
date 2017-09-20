@@ -1,5 +1,6 @@
 package com.example.android.quakereport;
 
+import android.text.TextUtils;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -21,7 +22,7 @@ import java.util.List;
  * Helper methods related to requesting and receiving earthquake data from USGS.
  */
 public final class QueryUtils {
-
+    public static final String LOG_TAG = EarthquakeActivity.class.getName();
 
     /**
      * Create a private constructor because no one should ever create a {@link QueryUtils} object.
@@ -36,6 +37,9 @@ public final class QueryUtils {
      * parsing a JSON response.
      */
     public static ArrayList<EarthquakeData> extractEarthquakes(String jsonResponse) {
+
+        if(TextUtils.isEmpty(jsonResponse))
+            return null;
 
         // Create an empty ArrayList that we can start adding earthquakes to
         ArrayList<EarthquakeData> earthquakes = new ArrayList<>();

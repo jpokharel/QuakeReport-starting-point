@@ -15,11 +15,13 @@
  */
 package com.example.android.quakereport;
 
+import android.app.LoaderManager;
 import android.content.Intent;
+import android.content.Loader;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -27,28 +29,18 @@ import android.widget.ListView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EarthquakeActivity extends AppCompatActivity {
+public class EarthquakeActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<EarthquakeData>> {
 
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
-    private static final String USGS_REQUEST_URL="https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&eventtype=earthquake&orderby=time&minmag=6&limit=10";
-
+    private static final String USGS_REQUEST_URL="https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&orderby=time&minmag=5&limit=10";
+    EarthquakeDataAdapter earthquakeDataAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.earthquake_activity);
 
-
-        //New changes being made..
-        EarthquakeAsyncTask task = new EarthquakeAsyncTask();
-        task.execute(USGS_REQUEST_URL);
-    }
-
-    public void updateUi(List<EarthquakeData> earthquakeDatalist){
-        // Create a fake list of earthquake locations.
-        final ArrayList<EarthquakeData> earthquakeDataArrayList = (ArrayList<EarthquakeData>) earthquakeDatalist;
-
-        EarthquakeDataAdapter earthquakeDataAdapter = new EarthquakeDataAdapter(this,earthquakeDataArrayList);
+        earthquakeDataAdapter= new EarthquakeDataAdapter(this,new ArrayList<EarthquakeData>());
 
         // Find a reference to the {@link ListView} in the layout
         ListView earthquakeListView = (ListView) findViewById(R.id.list);
@@ -56,32 +48,44 @@ public class EarthquakeActivity extends AppCompatActivity {
         // Set the adapter on the {@link ListView}
         // so the list can be populated in the user interface
         earthquakeListView.setAdapter(earthquakeDataAdapter);
+        Log.i(LOG_TAG,"***********************onCreate()*********************************");
+        getLoaderManager().initLoader(1,null,this);
+
         earthquakeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 //extract corresponding URL for the list element and an implicit intent to open in a browser.
-                String url = earthquakeDataArrayList.get(i).getUrl();
+                String url = ((EarthquakeData) earthquakeDataAdapter.getItem(i)).getUrl();
+               // String url = earthquakeDataArrayList.get(i).getUrl();
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setData(Uri.parse(url));
                 startActivity(intent);
             }
         });
+
     }
 
-    private class EarthquakeAsyncTask extends AsyncTask<String, Void,List<EarthquakeData>>{
 
-        @Override
-        protected List<EarthquakeData> doInBackground(String... strings) {
-            if(strings.length<1 || strings[0] == null)
-                return null;
-            return QueryUtils.fetchEarthquakeData(strings[0]);
-        }
 
-        @Override
-        public void onPostExecute(List<EarthquakeData> earthquakeDatas) {
-            if (earthquakeDatas.size() ==0)
-                return;
-            updateUi(earthquakeDatas);
-        }
+    @Override
+    public Loader<List<EarthquakeData>> onCreateLoader(int i, Bundle bundle) {
+        Log.i(LOG_TAG,"***********************onCreate()*********************************");
+        return new EarthquakeDataLoader(this,USGS_REQUEST_URL);
     }
+
+    @Override
+    public void onLoadFinished(Loader<List<EarthquakeData>> loader, List<EarthquakeData> earthquakeDatas) {
+        earthquakeDataAdapter.clear();
+        Log.i(LOG_TAG,"***********************onLoadFinished()*********************************");
+        if(earthquakeDatas !=null && !earthquakeDatas.isEmpty())
+            earthquakeDataAdapter.addAll(earthquakeDatas);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<EarthquakeData>> loader) {
+        Log.i(LOG_TAG,"***********************onLoaderReset()*********************************");
+        earthquakeDataAdapter.clear();
+    }
+
+
 }
