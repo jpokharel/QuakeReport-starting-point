@@ -18,6 +18,8 @@ package com.example.android.quakereport;
 import android.app.LoaderManager;
 import android.content.Intent;
 import android.content.Loader;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -37,11 +39,16 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
     private static final String USGS_REQUEST_URL="https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&orderby=time&minmag=5&limit=10";
     EarthquakeDataAdapter earthquakeDataAdapter;
     private TextView emptyTextView;
+    private View progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.earthquake_activity);
+
+        //Check if network connectivity is available
+        ConnectivityManager cm = (ConnectivityManager) getApplicationContext().getSystemService(CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
 
         earthquakeDataAdapter= new EarthquakeDataAdapter(this,new ArrayList<EarthquakeData>());
 
@@ -54,7 +61,15 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
         emptyTextView = (TextView) findViewById(R.id.empty_view);
         earthquakeListView.setEmptyView(emptyTextView);
         Log.i(LOG_TAG,"***********************onCreate()*********************************");
-        getLoaderManager().initLoader(1,null,this);
+        if(networkInfo!=null && networkInfo.isConnectedOrConnecting())
+            getLoaderManager().initLoader(1,null,this);
+        else{
+            progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+            progressBar.setVisibility(View.GONE);
+            emptyTextView.setText(R.string.no_internet_connection);
+        }
+
+        
 
         earthquakeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -80,9 +95,8 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
 
     @Override
     public void onLoadFinished(Loader<List<EarthquakeData>> loader, List<EarthquakeData> earthquakeDatas) {
-        //Progress bar removal upon loading result
-        View pr_bar = (ProgressBar) findViewById(R.id.progress_bar);
-        pr_bar.setVisibility(View.GONE);
+        //Progress bar removal upon loading result        
+        progressBar.setVisibility(View.GONE);
 
         //Set empty view text
         emptyTextView.setText(R.string.empty_text_view_text);
@@ -91,7 +105,7 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
         Log.i(LOG_TAG,"***********************onLoadFinished()*********************************");
         if(earthquakeDatas !=null && !earthquakeDatas.isEmpty())
             earthquakeDataAdapter.addAll(earthquakeDatas);
-            
+
     }
 
     @Override
