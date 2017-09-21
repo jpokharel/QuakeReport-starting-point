@@ -27,7 +27,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -64,7 +63,7 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
         if(networkInfo!=null && networkInfo.isConnectedOrConnecting())
             getLoaderManager().initLoader(1,null,this);
         else{
-            View progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+            View progressBar = findViewById(R.id.progress_bar);
             progressBar.setVisibility(View.GONE);
             emptyTextView.setText(R.string.no_internet_connection);
         }
@@ -96,7 +95,7 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
     @Override
     public void onLoadFinished(Loader<List<EarthquakeData>> loader, List<EarthquakeData> earthquakeDatas) {
         //Progress bar removal upon loading result
-        View progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        View progressBar = findViewById(R.id.progress_bar);
         progressBar.setVisibility(View.GONE);
 
         //Set empty view text
