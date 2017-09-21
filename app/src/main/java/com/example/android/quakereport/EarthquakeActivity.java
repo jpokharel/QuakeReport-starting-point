@@ -39,7 +39,7 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
     private static final String USGS_REQUEST_URL="https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&orderby=time&minmag=5&limit=10";
     EarthquakeDataAdapter earthquakeDataAdapter;
     private TextView emptyTextView;
-    private View progressBar;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +64,7 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
         if(networkInfo!=null && networkInfo.isConnectedOrConnecting())
             getLoaderManager().initLoader(1,null,this);
         else{
-            progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+            View progressBar = (ProgressBar) findViewById(R.id.progress_bar);
             progressBar.setVisibility(View.GONE);
             emptyTextView.setText(R.string.no_internet_connection);
         }
@@ -95,7 +95,8 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
 
     @Override
     public void onLoadFinished(Loader<List<EarthquakeData>> loader, List<EarthquakeData> earthquakeDatas) {
-        //Progress bar removal upon loading result        
+        //Progress bar removal upon loading result
+        View progressBar = (ProgressBar) findViewById(R.id.progress_bar);
         progressBar.setVisibility(View.GONE);
 
         //Set empty view text
